@@ -99,7 +99,8 @@
   "globals": {
     "window": true,
     "document": true,
-    "location": true
+    "location": true,
+    "UnityLoader": true
   },
   "env": {
     "jest": true

@@ -1,10 +1,37 @@
-import { useState, MouseEvent } from "react";
 import { NextPage } from "next";
-import Link from "next/link";
 import { css } from "@emotion/react";
-import { percent, em } from "~/lib/cssUtil";
-import { PAGE_ABOUT } from "~/local/pagePath";
-import useSampleCounter from "~/local/useSampleCounter";
+import { percent, px } from "~/lib/cssUtil";
+import Script from "next/script";
+import { useRef, useState } from "react";
+import { BASE_PATH } from "~/local/constants";
+
+const handleCompatibilityCheck = (
+  gameInstance: UnityLoader.Game,
+  onSuccess: () => void,
+  onError: () => void
+) => {
+  if (!UnityLoader.SystemInfo.hasWebGL) {
+    gameInstance.popup("Your browser does not support WebGL", [
+      { text: "OK", callback: onError }
+    ]);
+  } else if (UnityLoader.SystemInfo.mobile) {
+    gameInstance.popup(
+      "Please note that Unity WebGL is not currently supported on mobiles. Press OK if you wish to continue anyway.",
+      [{ text: "OK", callback: onSuccess }]
+    );
+  } else if (
+    ["Edge", "Firefox", "Chrome", "Safari"].indexOf(
+      UnityLoader.SystemInfo.browser
+    ) === -1
+  ) {
+    gameInstance.popup(
+      "Please note that your browser is not currently supported for this Unity WebGL content. Press OK if you wish to continue anyway.",
+      [{ text: "OK", callback: onSuccess }]
+    );
+  } else {
+    onSuccess();
+  }
+};
 
 const wrapperStyle = css({
   position: "fixed",
@@ -18,31 +45,91 @@ const wrapperStyle = css({
   height: percent(100)
 });
 
-const titleStyle = css({
-  fontWeight: "bold",
-  marginBottom: em(0.5)
+const mainStyle = css({
+  position: "relative"
+});
+
+const startViewStyle = css({
+  position: "absolute",
+  top: percent(0),
+  left: percent(0),
+  width: percent(100),
+  height: percent(100),
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center"
+});
+
+const progressViewStyle = css({
+  position: "absolute",
+  top: percent(0),
+  left: percent(0),
+  width: percent(100),
+  height: percent(100),
+  backgroundColor: "#000"
+});
+
+const progressBarStyle = css({
+  position: "absolute",
+  top: percent(50),
+  marginTop: px(-5),
+  height: px(10),
+  backgroundColor: "#f00"
+});
+
+const unityContainerStyle = css({
+  width: px(960),
+  height: px(600),
+  backgroundColor: "#888"
 });
 
 const PageIndex: NextPage = () => {
-  const [mouse, setMouse] = useState<[number, number]>([0, 0]);
-  const [count, increment] = useSampleCounter();
+  const buildName = "webgl-build";
+  const unityBuildRoot = `${BASE_PATH}${buildName}/Build`;
 
-  const updateMouse = (e: MouseEvent) => {
-    setMouse([e.pageX, e.pageY]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const unityContainerRef = useRef<HTMLDivElement | null>(null);
+  const gameInstanceRef = useRef<UnityLoader.Game | null>(null);
+
+  const handleStart = () => {
+    const { current: unityContainer } = unityContainerRef;
+    if (!unityContainer) {
+      return;
+    }
+    const unityInstance = UnityLoader.instantiate(
+      unityContainer,
+      `${unityBuildRoot}/${buildName}.json`,
+      {
+        compatibilityCheck: handleCompatibilityCheck,
+        onProgress: (u, p) => setProgress(p)
+      }
+    );
+    gameInstanceRef.current = unityInstance;
+    setIsLoading(true);
   };
 
   return (
-    <div css={wrapperStyle} onMouseMove={updateMouse}>
-      <div css={titleStyle}>Welcome to Next.js!</div>
-      <button type="button" onClick={increment}>
-        count up:{count}
-      </button>
-      <p>
-        <Link href={PAGE_ABOUT.href} passHref>
-          <a href="passHref">about</a>
-        </Link>
-      </p>
-      <p>{mouse.join(",")}</p>
+    <div css={wrapperStyle}>
+      <Script src={`${unityBuildRoot}/UnityLoader.js`} />
+      <div css={mainStyle}>
+        <div ref={unityContainerRef} css={unityContainerStyle} />
+        {!isLoading ? (
+          <div css={startViewStyle}>
+            <button type="button" onClick={handleStart}>
+              start
+            </button>
+          </div>
+        ) : null}
+        {isLoading && progress < 1 ? (
+          <div css={progressViewStyle}>
+            <div
+              style={{ width: percent(100 * progress) }}
+              css={progressBarStyle}
+            />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };
