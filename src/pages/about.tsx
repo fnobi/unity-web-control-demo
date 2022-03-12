@@ -81,7 +81,7 @@ const PageAbout: NextPage = () => {
             <a
               href={createTweetIntent({
                 url: PAGE_ABOUT.url,
-                text: "hinagata-next"
+                text: "unity-web-ctl-demo"
               })}
               target="_blank"
               rel="noopener noreferrer"

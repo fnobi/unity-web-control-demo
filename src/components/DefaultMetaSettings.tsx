@@ -4,7 +4,7 @@ import MetaSettings from "~/components/MetaSettings";
 import ASSETS_OGP from "~/assets/meta/ogp.png";
 import ASSETS_FAVICON from "~/assets/meta/favicon.ico";
 
-const DEFAULT_TITLE = "hinagata-next";
+const DEFAULT_TITLE = "unity-web-ctl-demo";
 const DEFAULT_DESCRIPTION = "Awsome next.js project.";
 const DEFAULT_KEYWORDS = ["react", "typescript", "next.js"];
 
