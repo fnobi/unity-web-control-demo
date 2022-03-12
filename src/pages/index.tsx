@@ -19,8 +19,8 @@ const wrapperStyle = css({
 const PageIndex: NextPage = () => (
   <div css={wrapperStyle}>
     <UnityEmbed
-      buildName="webgl-build"
-      unityBuildRoot={`${BASE_PATH}webgl-build/Build`}
+      buildName="karting-microgame"
+      unityBuildRoot={`${BASE_PATH}unity-webgl`}
     />
   </div>
 );
