@@ -37,13 +37,13 @@ const PageIndex: NextPage = () => {
       {game === 1 ? (
         <UnityEmbed
           buildName="karting-microgame"
-          unityBuildRoot={`${BASE_PATH}unity-webgl`}
+          unityBuildRoot={`${BASE_PATH}unity-webgl/karting-microgame/Build`}
         />
       ) : null}
       {game === 2 ? (
         <UnityEmbed
           buildName="demo"
-          unityBuildRoot={`${BASE_PATH}demo/Build`}
+          unityBuildRoot={`${BASE_PATH}unity-webgl/demo/Build`}
           sliderOption={{
             gameObject: "Main Camera",
             methodName: "SetAngle",

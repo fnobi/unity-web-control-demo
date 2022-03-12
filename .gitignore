@@ -3,3 +3,5 @@ node_modules
 .DS_Store
 yarn.lock
 next-env.d.ts
+public/unity-webgl/**/index.html
+public/unity-webgl/**/TemplateData
