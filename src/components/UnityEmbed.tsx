@@ -1,7 +1,7 @@
 import { css } from "@emotion/react";
 import { percent, px } from "~/lib/cssUtil";
 import Script from "next/script";
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 const handleCompatibilityCheck = (
   gameInstance: UnityLoader.Game,
@@ -69,14 +69,34 @@ const unityContainerStyle = css({
   backgroundColor: "#888"
 });
 
-const UnityEmbed: FC<{ buildName: string; unityBuildRoot: string }> = ({
-  buildName,
-  unityBuildRoot
-}) => {
+const UnityEmbed: FC<{
+  buildName: string;
+  unityBuildRoot: string;
+  sliderOption?: {
+    gameObject: string;
+    methodName: string;
+    min: number;
+    max: number;
+  };
+}> = ({ buildName, unityBuildRoot, sliderOption }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const unityContainerRef = useRef<HTMLDivElement | null>(null);
   const gameInstanceRef = useRef<UnityLoader.Game | null>(null);
+
+  const [slider, setSlider] = useState(0);
+
+  useEffect(() => {
+    const { current: gameInstance } = gameInstanceRef;
+    if (!gameInstance || !sliderOption) {
+      return;
+    }
+    gameInstance.SendMessage(
+      sliderOption.gameObject,
+      sliderOption.methodName,
+      slider
+    );
+  }, [slider, sliderOption]);
 
   const handleStart = () => {
     const { current: unityContainer } = unityContainerRef;
@@ -112,6 +132,19 @@ const UnityEmbed: FC<{ buildName: string; unityBuildRoot: string }> = ({
             style={{ width: percent(100 * progress) }}
             css={progressBarStyle}
           />
+        </div>
+      ) : null}
+      {isLoading && progress >= 1 && sliderOption ? (
+        <div>
+          <input
+            type="range"
+            min={sliderOption.min}
+            max={sliderOption.max}
+            value={slider}
+            onChange={e => setSlider(Number(e.target.value))}
+          />
+          &nbsp;
+          {slider}
         </div>
       ) : null}
     </div>

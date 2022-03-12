@@ -4,6 +4,12 @@ declare namespace UnityLoader {
       text: string,
       buttons: { text: string; callback: () => void }[]
     ): void;
+
+    public SendMessage(
+      gameObject: string,
+      methodName: string,
+      ...args: unknown[]
+    ): void;
   }
   export function instantiate(
     container: HTMLElement | string,

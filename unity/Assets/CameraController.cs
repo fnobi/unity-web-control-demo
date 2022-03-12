@@ -31,4 +31,9 @@ public class CameraController : MonoBehaviour
         );
         transform.LookAt(target.transform);
     }
+
+    public void SetAngle(float v)
+    {
+        angle = v;
+    }
 }
