@@ -116,7 +116,8 @@
     "window": true,
     "document": true,
     "location": true,
-    "UnityLoader": true
+    "UnityLoader": true,
+    "createUnityInstance": true
   },
   "env": {
     "jest": true

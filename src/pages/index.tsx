@@ -4,6 +4,7 @@ import { em, percent } from "~/lib/cssUtil";
 import { useState } from "react";
 import { BASE_PATH } from "~/local/constants";
 import UnityEmbed from "~/components/UnityEmbed";
+import UnityEmbed2021 from "~/components/UnityEmbed2021";
 
 const wrapperStyle = css({
   position: "fixed",
@@ -22,7 +23,7 @@ const headerStyle = css({
 });
 
 const PageIndex: NextPage = () => {
-  const [game, setGame] = useState<1 | 2>(1);
+  const [game, setGame] = useState<1 | 2 | 3>(3);
   return (
     <div css={wrapperStyle}>
       <div css={headerStyle}>
@@ -32,6 +33,10 @@ const PageIndex: NextPage = () => {
         &nbsp;
         <button type="button" disabled={game === 2} onClick={() => setGame(2)}>
           demo
+        </button>
+        &nbsp;
+        <button type="button" disabled={game === 3} onClick={() => setGame(3)}>
+          sample2021
         </button>
       </div>
       {game === 1 ? (
@@ -50,6 +55,12 @@ const PageIndex: NextPage = () => {
             min: 0,
             max: 360
           }}
+        />
+      ) : null}
+      {game === 3 ? (
+        <UnityEmbed2021
+          buildName="sample2021"
+          unityBuildRoot={`${BASE_PATH}unity-webgl/sample2021/Build`}
         />
       ) : null}
     </div>
