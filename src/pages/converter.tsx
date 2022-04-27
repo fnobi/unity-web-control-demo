@@ -11,7 +11,7 @@ import {
 } from "three";
 import { css } from "@emotion/react";
 import { em, percent } from "~/lib/cssUtil";
-import { useEffect, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { BASE_PATH } from "~/local/constants";
 import UnityEmbed2021 from "~/components/UnityEmbed2021";
 
@@ -34,6 +34,7 @@ const wrapperStyle = css({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  flexDirection: "column",
   top: percent(0),
   left: percent(0),
   width: percent(100),
@@ -51,8 +52,38 @@ const threeCanvasStyle = css({
   marginLeft: em(1)
 });
 
+const Slider: FC<{
+  label: string;
+  value: number;
+  onValue: (n: number) => void;
+}> = ({ label, value, onValue }) => (
+  <p>
+    {label}:&nbsp;
+    <input
+      type="number"
+      step={0.01}
+      style={{ width: em(5) }}
+      value={value}
+      onChange={e => onValue(Number(e.target.value))}
+    />
+    &nbsp;
+    <input
+      type="range"
+      value={value}
+      min={-3.2}
+      max={3.2}
+      step={0.01}
+      onChange={e => onValue(Number(e.target.value))}
+    />
+  </p>
+);
+
 const PageConverter: NextPage = () => {
-  const threeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [rotateX, setRotateX] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  const [rotateZ, setRotateZ] = useState(0);
+  const threeCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const threeCubeRef = useRef<Mesh | null>(null);
 
   useEffect(() => {
     const { current: canvas } = threeCanvasRef;
@@ -74,6 +105,7 @@ const PageConverter: NextPage = () => {
     const material = new MeshBasicMaterial({ color: 0x00ff00 });
     const cube = new Mesh(geometry, material);
     scene.add(cube);
+    threeCubeRef.current = cube;
 
     camera.position.copy(CAMERA_POSITION);
     camera.rotation.copy(CAMERA_ROTATION);
@@ -88,9 +120,17 @@ const PageConverter: NextPage = () => {
     animate();
 
     return () => {
+      threeCubeRef.current = null;
       window.cancelAnimationFrame(t);
     };
   }, []);
+
+  useEffect(() => {
+    const { current: cube } = threeCubeRef;
+    if (cube) {
+      cube.rotation.set(rotateX, rotateY, rotateZ);
+    }
+  }, [rotateX, rotateY, rotateZ]);
 
   return (
     <div css={wrapperStyle}>
@@ -105,6 +145,11 @@ const PageConverter: NextPage = () => {
           ref={threeCanvasRef}
           css={threeCanvasStyle}
         />
+      </div>
+      <div>
+        <Slider label="x" value={rotateX} onValue={setRotateX} />
+        <Slider label="y" value={rotateY} onValue={setRotateY} />
+        <Slider label="z" value={rotateZ} onValue={setRotateZ} />
       </div>
     </div>
   );
