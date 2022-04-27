@@ -12,8 +12,9 @@ import {
 import { css } from "@emotion/react";
 import { em, percent } from "~/lib/cssUtil";
 import { FC, useEffect, useRef, useState } from "react";
+import useUnity from "~/lib/useUnity";
+import Script from "next/script";
 import { BASE_PATH } from "~/local/constants";
-import UnityEmbed2021 from "~/components/UnityEmbed2021";
 
 // このへんはunity側と前提を揃える必要があるところ
 const WIDTH = 960;
@@ -88,6 +89,11 @@ const PageConverter: NextPage = () => {
   const threeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const threeCubeRef = useRef<Mesh | null>(null);
 
+  const { unityCanvasRef, scriptSrc } = useUnity({
+    buildName: "sample2021",
+    unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`
+  });
+
   useEffect(() => {
     const { current: canvas } = threeCanvasRef;
     if (!canvas) {
@@ -137,12 +143,15 @@ const PageConverter: NextPage = () => {
 
   return (
     <div css={wrapperStyle}>
+      <Script src={scriptSrc} />
       <div css={columnStyle}>
         <div>
           <p>unity</p>
-          <UnityEmbed2021
-            buildName="sample2021"
-            unityBuildRoot={`${BASE_PATH}/unity-webgl/sample2021/Build`}
+          <canvas
+            ref={unityCanvasRef}
+            id="unity-canvas"
+            width={WIDTH}
+            height={HEIGHT}
           />
         </div>
         <div css={threeCanvasStyle}>
