@@ -33,7 +33,7 @@ const useUnity = (opts: { buildName: string; unityBuildRoot: string }) => {
     if (!window.createUnityInstance) {
       const t = window.setTimeout(() => {
         setRetryCount(c => c + 1);
-      }, 1000);
+      }, 100);
       return () => {
         window.clearTimeout(t);
       };
