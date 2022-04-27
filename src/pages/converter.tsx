@@ -44,12 +44,15 @@ const wrapperStyle = css({
 const columnStyle = css({
   display: "flex",
   justifyContent: "center",
-  alignItems: "center"
+  alignItems: "center",
+  textAlign: "center"
 });
 
 const threeCanvasStyle = css({
-  backgroundColor: "#ccc",
-  marginLeft: em(1)
+  marginLeft: em(1),
+  canvas: {
+    backgroundColor: "#ccc"
+  }
 });
 
 const Slider: FC<{
@@ -135,16 +138,17 @@ const PageConverter: NextPage = () => {
   return (
     <div css={wrapperStyle}>
       <div css={columnStyle}>
-        <UnityEmbed2021
-          buildName="sample2021"
-          unityBuildRoot={`${BASE_PATH}/unity-webgl/sample2021/Build`}
-        />
-        <canvas
-          width={WIDTH}
-          height={HEIGHT}
-          ref={threeCanvasRef}
-          css={threeCanvasStyle}
-        />
+        <div>
+          <p>unity</p>
+          <UnityEmbed2021
+            buildName="sample2021"
+            unityBuildRoot={`${BASE_PATH}/unity-webgl/sample2021/Build`}
+          />
+        </div>
+        <div css={threeCanvasStyle}>
+          <p>three.js</p>
+          <canvas width={WIDTH} height={HEIGHT} ref={threeCanvasRef} />
+        </div>
       </div>
       <div>
         <Slider label="x" value={rotateX} onValue={setRotateX} />
