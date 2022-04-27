@@ -87,8 +87,10 @@ const PageConverter: NextPage = () => {
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
   const [rotateZ, setRotateZ] = useState(0);
+  const [isCamera, setIsCamera] = useState(false);
   const threeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const threeCubeRef = useRef<Mesh | null>(null);
+  const threeCameraRef = useRef<PerspectiveCamera | null>(null);
 
   const { gameInstanceRef, unityCanvasRef, scriptSrc } = useUnity({
     buildName: "sample2021",
@@ -119,6 +121,7 @@ const PageConverter: NextPage = () => {
 
     camera.position.copy(CAMERA_POSITION);
     camera.rotation.copy(CAMERA_ROTATION);
+    threeCameraRef.current = camera;
 
     let t = -1;
 
@@ -131,15 +134,40 @@ const PageConverter: NextPage = () => {
 
     return () => {
       threeCubeRef.current = null;
+      threeCameraRef.current = null;
       window.cancelAnimationFrame(t);
     };
   }, []);
 
   useEffect(() => {
     const { current: cube } = threeCubeRef;
+    const { current: camera } = threeCameraRef;
     const { current: game } = gameInstanceRef;
+    if (camera) {
+      camera.rotation.set(
+        isCamera ? rotateX : 0,
+        isCamera ? rotateY : Math.PI,
+        isCamera ? rotateZ : 0
+      );
+    }
     if (cube) {
-      cube.rotation.set(rotateX, rotateY, rotateZ);
+      cube.rotation.set(
+        isCamera ? 0 : rotateX,
+        isCamera ? 0 : rotateY,
+        isCamera ? 0 : rotateZ
+      );
+    }
+    if (camera && game) {
+      const q = new Quaternion();
+      q.setFromEuler(camera.rotation);
+      const rotater = new Quaternion();
+      rotater.setFromAxisAngle(new Vector3(0, 1, 0).normalize(), Math.PI);
+      q.multiply(rotater);
+      game.SendMessage("Main Camera", "SetQuaternionX", q.x);
+      game.SendMessage("Main Camera", "SetQuaternionY", -q.y);
+      game.SendMessage("Main Camera", "SetQuaternionZ", -q.z);
+      game.SendMessage("Main Camera", "SetQuaternionW", q.w);
+      game.SendMessage("Main Camera", "ApplyQuaternion");
     }
     if (cube && game) {
       const q = new Quaternion();
@@ -150,7 +178,7 @@ const PageConverter: NextPage = () => {
       game.SendMessage("Cube", "SetQuaternionW", q.w);
       game.SendMessage("Cube", "ApplyQuaternion");
     }
-  }, [rotateX, rotateY, rotateZ]);
+  }, [rotateX, rotateY, rotateZ, isCamera]);
 
   return (
     <div css={wrapperStyle}>
@@ -171,6 +199,25 @@ const PageConverter: NextPage = () => {
         </div>
       </div>
       <div>
+        <p>
+          <label>
+            <input
+              type="radio"
+              checked={!isCamera}
+              onChange={e => setIsCamera(!e.target.checked)}
+            />
+            box
+          </label>
+          &nbsp;
+          <label>
+            <input
+              type="radio"
+              checked={isCamera}
+              onChange={e => setIsCamera(e.target.checked)}
+            />
+            camera
+          </label>
+        </p>
         <Slider label="x" value={rotateX} onValue={setRotateX} />
         <Slider label="y" value={rotateY} onValue={setRotateY} />
         <Slider label="z" value={rotateZ} onValue={setRotateZ} />
