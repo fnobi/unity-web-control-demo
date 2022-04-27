@@ -89,7 +89,7 @@ const PageConverter: NextPage = () => {
   const threeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const threeCubeRef = useRef<Mesh | null>(null);
 
-  const { unityCanvasRef, scriptSrc } = useUnity({
+  const { gameInstanceRef, unityCanvasRef, scriptSrc } = useUnity({
     buildName: "sample2021",
     unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`
   });
@@ -136,8 +136,15 @@ const PageConverter: NextPage = () => {
 
   useEffect(() => {
     const { current: cube } = threeCubeRef;
+    const { current: game } = gameInstanceRef;
     if (cube) {
       cube.rotation.set(rotateX, rotateY, rotateZ);
+    }
+    if (game) {
+      game.SendMessage("Cube", "SetRotationX", (180 / Math.PI) * -rotateX);
+      game.SendMessage("Cube", "SetRotationY", (180 / Math.PI) * rotateY + 180);
+      game.SendMessage("Cube", "SetRotationZ", (180 / Math.PI) * rotateZ * -1);
+      game.SendMessage("Cube", "ApplyRotation");
     }
   }, [rotateX, rotateY, rotateZ]);
 
