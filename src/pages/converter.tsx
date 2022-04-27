@@ -5,6 +5,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   PerspectiveCamera,
+  Quaternion,
   Scene,
   Vector3,
   WebGLRenderer
@@ -140,11 +141,14 @@ const PageConverter: NextPage = () => {
     if (cube) {
       cube.rotation.set(rotateX, rotateY, rotateZ);
     }
-    if (game) {
-      game.SendMessage("Cube", "SetRotationX", (180 / Math.PI) * -rotateX);
-      game.SendMessage("Cube", "SetRotationY", (180 / Math.PI) * rotateY + 180);
-      game.SendMessage("Cube", "SetRotationZ", (180 / Math.PI) * rotateZ * -1);
-      game.SendMessage("Cube", "ApplyRotation");
+    if (cube && game) {
+      const q = new Quaternion();
+      q.setFromEuler(cube.rotation);
+      game.SendMessage("Cube", "SetQuaternionX", q.x);
+      game.SendMessage("Cube", "SetQuaternionY", -q.y);
+      game.SendMessage("Cube", "SetQuaternionZ", -q.z);
+      game.SendMessage("Cube", "SetQuaternionW", q.w);
+      game.SendMessage("Cube", "ApplyQuaternion");
     }
   }, [rotateX, rotateY, rotateZ]);
 

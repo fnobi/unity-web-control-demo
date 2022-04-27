@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    private float rotationX = 0;
-    private float rotationY = 0;
-    private float rotationZ = 0;
+    private float quaternionX = 0;
+    private float quaternionY = 0;
+    private float quaternionZ = 0;
+    private float quaternionW = 0;
 
     void Start()
     {
@@ -16,25 +17,30 @@ public class CameraController : MonoBehaviour
     {
     }
 
-    public void SetRotationX(float x)
+    public void SetQuaternionX(float x)
     {
-        this.rotationX = x;
-        Debug.Log("SetRotationX:" + x);
+        this.quaternionX = x;
+        Debug.Log("SetQuaternionX:" + x);
     }
-    public void SetRotationY(float y)
+    public void SetQuaternionY(float y)
     {
-        this.rotationY = y;
-        Debug.Log("SetRotationY:" + y);
+        this.quaternionY = y;
+        Debug.Log("SetQuaternionY:" + y);
     }
-    public void SetRotationZ(float z)
+    public void SetQuaternionZ(float z)
     {
-        this.rotationZ = z;
-        Debug.Log("SetRotationZ:" + z);
+        this.quaternionZ = z;
+        Debug.Log("SetQuaternionZ:" + z);
     }
-    public void ApplyRotation()
+    public void SetQuaternionW(float w)
     {
-        Vector3 v = new Vector3(rotationX, rotationY, rotationZ);
-        transform.eulerAngles = v;
-        Debug.Log("ApplyRotation:" + v);
+        this.quaternionW = w;
+        Debug.Log("SetQuaternionW:" + w);
+    }
+    public void ApplyQuaternion()
+    {
+        Quaternion q = new Quaternion(quaternionX, quaternionY, quaternionZ, quaternionW);
+        transform.rotation = q;
+        Debug.Log("ApplyQuaternion:" + transform.rotation);
     }
 }
