@@ -75,7 +75,7 @@ const UnityEmbed2021: FC<{
     if (!unityContainer) {
       return;
     }
-    const unityInstance = createUnityInstance(unityContainer, {
+    createUnityInstance(unityContainer, {
       dataUrl: `${unityBuildRoot}/${buildName}.data`,
       frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js`,
       codeUrl: `${unityBuildRoot}/${buildName}.wasm`,
@@ -83,9 +83,10 @@ const UnityEmbed2021: FC<{
       companyName: "DefaultCompany",
       productName: buildName,
       productVersion: "0.1"
+    }).then(unityInstance => {
+      gameInstanceRef.current = unityInstance;
+      setIsLoading(true);
     });
-    gameInstanceRef.current = unityInstance;
-    setIsLoading(true);
   };
 
   return (

@@ -11,4 +11,4 @@ declare function createUnityInstance(
     matchWebGLToCanvasSize?: boolean;
     devicePixelRatio?: number;
   }
-): UnityLoader.Game;
+): Promise<UnityLoader.Game>;
