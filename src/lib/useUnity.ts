@@ -8,6 +8,7 @@ const useUnity = (opts: {
   const { isActive, buildName, unityBuildRoot } = opts;
   const [isLoading, setIsLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const unityCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameInstanceRef = useRef<UnityInstance | null>(null);
 
@@ -16,16 +17,20 @@ const useUnity = (opts: {
     if (!unityContainer) {
       return;
     }
-    createUnityInstance(unityContainer, {
-      dataUrl: `${unityBuildRoot}/${buildName}.data`,
-      frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js`,
-      codeUrl: `${unityBuildRoot}/${buildName}.wasm`,
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "DefaultCompany",
-      productName: buildName,
-      productVersion: "0.1",
-      matchWebGLToCanvasSize: false
-    }).then(unityInstance => {
+    createUnityInstance(
+      unityContainer,
+      {
+        dataUrl: `${unityBuildRoot}/${buildName}.data`,
+        frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js`,
+        codeUrl: `${unityBuildRoot}/${buildName}.wasm`,
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: buildName,
+        productVersion: "0.1",
+        matchWebGLToCanvasSize: false
+      },
+      setLoadingProgress
+    ).then(unityInstance => {
       gameInstanceRef.current = unityInstance;
       setIsLoading(true);
     });
@@ -49,6 +54,7 @@ const useUnity = (opts: {
     handleStart();
     return () => {
       const { current: gameInstance } = gameInstanceRef;
+      setLoadingProgress(0);
       if (gameInstance) {
         gameInstance.Quit();
       }
@@ -59,6 +65,7 @@ const useUnity = (opts: {
     unityCanvasRef,
     gameInstanceRef,
     isLoading,
+    loadingProgress,
     scriptSrc
   };
 };
