@@ -9,7 +9,7 @@ const useUnity = (opts: {
   const [isLoading, setIsLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const unityCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const gameInstanceRef = useRef<UnityLoader.Game | null>(null);
+  const gameInstanceRef = useRef<UnityInstance | null>(null);
 
   const handleStart = () => {
     const { current: unityContainer } = unityCanvasRef;
@@ -47,7 +47,12 @@ const useUnity = (opts: {
     }
 
     handleStart();
-    return () => {};
+    return () => {
+      const { current: gameInstance } = gameInstanceRef;
+      if (gameInstance) {
+        gameInstance.Quit();
+      }
+    };
   }, [isActive, retryCount]);
 
   return {
