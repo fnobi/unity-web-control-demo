@@ -48,10 +48,14 @@ const useUnity = (opts: {
         matchWebGLToCanvasSize: false
       },
       setLoadingProgress
-    ).then(unityInstance => {
-      unityInstanceRef.current = unityInstance;
-      setStatusCode(1);
-    });
+    )
+      .then(unityInstance => {
+        unityInstanceRef.current = unityInstance;
+        setStatusCode(1);
+      })
+      .catch(msg => {
+        console.log(msg);
+      });
   };
 
   useEffect(() => {
