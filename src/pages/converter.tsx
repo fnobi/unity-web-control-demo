@@ -93,6 +93,7 @@ const PageConverter: NextPage = () => {
   const threeCameraRef = useRef<PerspectiveCamera | null>(null);
 
   const { gameInstanceRef, unityCanvasRef, scriptSrc } = useUnity({
+    isActive: true,
     buildName: "sample2021",
     unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`
   });

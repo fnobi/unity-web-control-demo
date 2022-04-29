@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
-const useUnity = (opts: { buildName: string; unityBuildRoot: string }) => {
-  const { buildName, unityBuildRoot } = opts;
+const useUnity = (opts: {
+  isActive: boolean;
+  buildName: string;
+  unityBuildRoot: string;
+}) => {
+  const { isActive, buildName, unityBuildRoot } = opts;
   const [isLoading, setIsLoading] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const unityCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -30,6 +34,9 @@ const useUnity = (opts: { buildName: string; unityBuildRoot: string }) => {
   const scriptSrc = `${unityBuildRoot}/${buildName}.loader.js`;
 
   useEffect(() => {
+    if (!isActive) {
+      return () => {};
+    }
     if (!window.createUnityInstance) {
       const t = window.setTimeout(() => {
         setRetryCount(c => c + 1);
@@ -41,7 +48,7 @@ const useUnity = (opts: { buildName: string; unityBuildRoot: string }) => {
 
     handleStart();
     return () => {};
-  }, [retryCount]);
+  }, [isActive, retryCount]);
 
   return {
     unityCanvasRef,
