@@ -25,8 +25,15 @@ const pauseViewStyle = css({
   left: em(1)
 });
 
-const unityCanvasStyle = css({
-  backgroundColor: "#888"
+const unityContainerStyle = css({
+  backgroundColor: "#888",
+  canvas: {
+    position: "absolute",
+    left: percent(0),
+    top: percent(0),
+    width: percent(100),
+    height: percent(100)
+  }
 });
 
 const progressViewStyle = css({
@@ -53,20 +60,20 @@ const UnityEmbed2021: FC<{
   height?: number;
 }> = ({ buildName, unityBuildRoot, width = 960, height = 600 }) => {
   const [isActive, setIsActive] = useState(false);
-  const { unityCanvasRef, scriptSrc, statusCode, loadingProgress } = useUnity({
-    isActive,
-    buildName,
-    unityBuildRoot
-  });
+  const { unityContainerRef, scriptSrc, statusCode, loadingProgress } =
+    useUnity({
+      isActive,
+      buildName,
+      unityBuildRoot,
+      width,
+      height
+    });
   return (
     <div css={mainStyle}>
       <Script src={scriptSrc} />
-      <canvas
-        ref={unityCanvasRef}
-        id={`unity-canvas-${buildName}`}
-        css={css(unityCanvasStyle, { width: px(width), height: px(height) })}
-        width={width}
-        height={height}
+      <div
+        ref={unityContainerRef}
+        css={css(unityContainerStyle, { width: px(width), height: px(height) })}
       />
       {statusCode === -1 ? (
         <div css={startViewStyle}>

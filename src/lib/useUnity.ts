@@ -4,22 +4,39 @@ const useUnity = (opts: {
   isActive: boolean;
   buildName: string;
   unityBuildRoot: string;
+  width: number;
+  height: number;
 }) => {
-  const { isActive, buildName, unityBuildRoot } = opts;
+  const { isActive, buildName, unityBuildRoot, width, height } = opts;
   const [statusCode, setStatusCode] = useState<-1 | 0 | 1>(-1);
   const [retryCount, setRetryCount] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const unityCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const gameInstanceRef = useRef<UnityInstance | null>(null);
+  const unityContainerRef = useRef<HTMLDivElement | null>(null);
+  const unityInstanceRef = useRef<UnityInstance | null>(null);
 
-  const handleStart = () => {
-    const { current: unityContainer } = unityCanvasRef;
+  const cleanContainer = () => {
+    const { current: unityContainer } = unityContainerRef;
     if (!unityContainer) {
       return;
     }
+    unityContainer.innerHTML = "";
+  };
+
+  const handleStart = () => {
+    const { current: unityContainer } = unityContainerRef;
+    if (!unityContainer) {
+      return;
+    }
+    cleanContainer();
+    const canvas = document.createElement("canvas");
+    canvas.setAttribute("id", `unity-canvas-${buildName}`);
+    canvas.setAttribute("width", String(width));
+    canvas.setAttribute("height", String(height));
+    unityContainer.appendChild(canvas);
+
     setStatusCode(0);
     createUnityInstance(
-      unityContainer,
+      canvas,
       {
         dataUrl: `${unityBuildRoot}/${buildName}.data`,
         frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js`,
@@ -32,12 +49,10 @@ const useUnity = (opts: {
       },
       setLoadingProgress
     ).then(unityInstance => {
-      gameInstanceRef.current = unityInstance;
+      unityInstanceRef.current = unityInstance;
       setStatusCode(1);
     });
   };
-
-  const scriptSrc = `${unityBuildRoot}/${buildName}.loader.js`;
 
   useEffect(() => {
     if (!isActive) {
@@ -54,18 +69,20 @@ const useUnity = (opts: {
 
     handleStart();
     return () => {
-      const { current: gameInstance } = gameInstanceRef;
+      const { current: unityInstance } = unityInstanceRef;
       setLoadingProgress(0);
       setStatusCode(-1);
-      if (gameInstance) {
-        gameInstance.Quit();
+      if (unityInstance) {
+        unityInstance.Quit().then(() => cleanContainer());
       }
     };
   }, [isActive, retryCount]);
 
+  const scriptSrc = `${unityBuildRoot}/${buildName}.loader.js`;
+
   return {
-    unityCanvasRef,
-    gameInstanceRef,
+    unityContainerRef,
+    unityInstanceRef,
     statusCode,
     loadingProgress,
     scriptSrc

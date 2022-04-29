@@ -92,10 +92,12 @@ const PageConverter: NextPage = () => {
   const threeCubeRef = useRef<Mesh | null>(null);
   const threeCameraRef = useRef<PerspectiveCamera | null>(null);
 
-  const { gameInstanceRef, unityCanvasRef, scriptSrc } = useUnity({
+  const { unityInstanceRef, unityContainerRef, scriptSrc } = useUnity({
     isActive: true,
     buildName: "sample2021",
-    unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`
+    unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`,
+    width: WIDTH,
+    height: HEIGHT
   });
 
   useEffect(() => {
@@ -143,7 +145,7 @@ const PageConverter: NextPage = () => {
   useEffect(() => {
     const { current: cube } = threeCubeRef;
     const { current: camera } = threeCameraRef;
-    const { current: game } = gameInstanceRef;
+    const { current: unityInstance } = unityInstanceRef;
     if (camera) {
       camera.rotation.set(
         isCamera ? rotateX : 0,
@@ -158,26 +160,26 @@ const PageConverter: NextPage = () => {
         isCamera ? 0 : rotateZ
       );
     }
-    if (camera && game) {
+    if (camera && unityInstance) {
       const q = new Quaternion();
       q.setFromEuler(camera.rotation);
       const rotater = new Quaternion();
       rotater.setFromAxisAngle(new Vector3(0, 1, 0).normalize(), Math.PI);
       q.multiply(rotater);
-      game.SendMessage("Main Camera", "SetQuaternionX", q.x);
-      game.SendMessage("Main Camera", "SetQuaternionY", -q.y);
-      game.SendMessage("Main Camera", "SetQuaternionZ", -q.z);
-      game.SendMessage("Main Camera", "SetQuaternionW", q.w);
-      game.SendMessage("Main Camera", "ApplyQuaternion");
+      unityInstance.SendMessage("Main Camera", "SetQuaternionX", q.x);
+      unityInstance.SendMessage("Main Camera", "SetQuaternionY", -q.y);
+      unityInstance.SendMessage("Main Camera", "SetQuaternionZ", -q.z);
+      unityInstance.SendMessage("Main Camera", "SetQuaternionW", q.w);
+      unityInstance.SendMessage("Main Camera", "ApplyQuaternion");
     }
-    if (cube && game) {
+    if (cube && unityInstance) {
       const q = new Quaternion();
       q.setFromEuler(cube.rotation);
-      game.SendMessage("Cube", "SetQuaternionX", q.x);
-      game.SendMessage("Cube", "SetQuaternionY", -q.y);
-      game.SendMessage("Cube", "SetQuaternionZ", -q.z);
-      game.SendMessage("Cube", "SetQuaternionW", q.w);
-      game.SendMessage("Cube", "ApplyQuaternion");
+      unityInstance.SendMessage("Cube", "SetQuaternionX", q.x);
+      unityInstance.SendMessage("Cube", "SetQuaternionY", -q.y);
+      unityInstance.SendMessage("Cube", "SetQuaternionZ", -q.z);
+      unityInstance.SendMessage("Cube", "SetQuaternionW", q.w);
+      unityInstance.SendMessage("Cube", "ApplyQuaternion");
     }
   }, [rotateX, rotateY, rotateZ, isCamera]);
 
@@ -187,12 +189,7 @@ const PageConverter: NextPage = () => {
       <div css={columnStyle}>
         <div>
           <p>unity</p>
-          <canvas
-            ref={unityCanvasRef}
-            id="unity-canvas"
-            width={WIDTH}
-            height={HEIGHT}
-          />
+          <div ref={unityContainerRef} />
         </div>
         <div css={threeCanvasStyle}>
           <p>three.js</p>
