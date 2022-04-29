@@ -6,7 +6,7 @@ const useUnity = (opts: {
   unityBuildRoot: string;
 }) => {
   const { isActive, buildName, unityBuildRoot } = opts;
-  const [isLoading, setIsLoading] = useState(false);
+  const [statusCode, setStatusCode] = useState<-1 | 0 | 1>(-1);
   const [retryCount, setRetryCount] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const unityCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -17,6 +17,7 @@ const useUnity = (opts: {
     if (!unityContainer) {
       return;
     }
+    setStatusCode(0);
     createUnityInstance(
       unityContainer,
       {
@@ -32,7 +33,7 @@ const useUnity = (opts: {
       setLoadingProgress
     ).then(unityInstance => {
       gameInstanceRef.current = unityInstance;
-      setIsLoading(true);
+      setStatusCode(1);
     });
   };
 
@@ -55,6 +56,7 @@ const useUnity = (opts: {
     return () => {
       const { current: gameInstance } = gameInstanceRef;
       setLoadingProgress(0);
+      setStatusCode(-1);
       if (gameInstance) {
         gameInstance.Quit();
       }
@@ -64,7 +66,7 @@ const useUnity = (opts: {
   return {
     unityCanvasRef,
     gameInstanceRef,
-    isLoading,
+    statusCode,
     loadingProgress,
     scriptSrc
   };

@@ -52,9 +52,9 @@ const UnityEmbed2021: FC<{
   width?: number;
   height?: number;
 }> = ({ buildName, unityBuildRoot, width = 960, height = 600 }) => {
-  const [isStarted, setIsStarted] = useState(false);
-  const { unityCanvasRef, scriptSrc, loadingProgress } = useUnity({
-    isActive: isStarted,
+  const [isActive, setIsActive] = useState(false);
+  const { unityCanvasRef, scriptSrc, statusCode, loadingProgress } = useUnity({
+    isActive,
     buildName,
     unityBuildRoot
   });
@@ -68,7 +68,14 @@ const UnityEmbed2021: FC<{
         width={width}
         height={height}
       />
-      {isStarted && loadingProgress < 1 ? (
+      {statusCode === -1 ? (
+        <div css={startViewStyle}>
+          <button type="button" onClick={() => setIsActive(true)}>
+            start
+          </button>
+        </div>
+      ) : null}
+      {statusCode === 0 ? (
         <div css={progressViewStyle}>
           <div
             style={{ width: percent(100 * loadingProgress) }}
@@ -76,19 +83,13 @@ const UnityEmbed2021: FC<{
           />
         </div>
       ) : null}
-      {isStarted ? (
+      {statusCode === 1 ? (
         <div css={pauseViewStyle}>
-          <button type="button" onClick={() => setIsStarted(false)}>
+          <button type="button" onClick={() => setIsActive(false)}>
             pause
           </button>
         </div>
-      ) : (
-        <div css={startViewStyle}>
-          <button type="button" onClick={() => setIsStarted(true)}>
-            start
-          </button>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 };

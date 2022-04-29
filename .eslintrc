@@ -117,6 +117,7 @@
     "document": true,
     "location": true,
     "UnityLoader": true,
+    "UnityInstance": true,
     "createUnityInstance": true
   },
   "env": {
