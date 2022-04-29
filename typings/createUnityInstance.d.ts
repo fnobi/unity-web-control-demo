@@ -1,5 +1,17 @@
+declare class UnityInstance {
+  public SetFullscreen(fullscreen: boolean): void;
+
+  public SendMessage(
+    gameObject: string,
+    methodName: string,
+    ...args: unknown[]
+  ): void;
+
+  public Quit(): Promise<void>;
+}
+
 declare function createUnityInstance(
-  el: HTMLCanvasElement,
+  canvas: HTMLCanvasElement,
   options: {
     dataUrl: string;
     frameworkUrl: string;
@@ -10,5 +22,8 @@ declare function createUnityInstance(
     productVersion: string;
     matchWebGLToCanvasSize?: boolean;
     devicePixelRatio?: number;
-  }
-): UnityLoader.Game;
+  },
+  onProgress?: (progress: number) => void,
+  onSuccess?: (unityInstance: UnityInstance) => void,
+  onError?: (message: string) => void
+): Promise<UnityInstance>;

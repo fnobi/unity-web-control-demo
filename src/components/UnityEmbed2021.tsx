@@ -1,7 +1,8 @@
 import { css } from "@emotion/react";
-import { percent, px } from "~/lib/cssUtil";
+import { em, percent, px } from "~/lib/cssUtil";
 import Script from "next/script";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useState } from "react";
+import useUnity from "~/lib/useUnity";
 
 const mainStyle = css({
   position: "relative"
@@ -16,6 +17,23 @@ const startViewStyle = css({
   display: "flex",
   justifyContent: "center",
   alignItems: "center"
+});
+
+const pauseViewStyle = css({
+  position: "absolute",
+  top: em(1),
+  left: em(1)
+});
+
+const unityContainerStyle = css({
+  backgroundColor: "#888",
+  canvas: {
+    position: "absolute",
+    left: percent(0),
+    top: percent(0),
+    width: percent(100),
+    height: percent(100)
+  }
 });
 
 const progressViewStyle = css({
@@ -35,97 +53,48 @@ const progressBarStyle = css({
   backgroundColor: "#f00"
 });
 
-const unityContainerStyle = css({
-  width: px(960),
-  height: px(600),
-  backgroundColor: "#888"
-});
-
 const UnityEmbed2021: FC<{
   buildName: string;
   unityBuildRoot: string;
-  sliderOption?: {
-    gameObject: string;
-    methodName: string;
-    min: number;
-    max: number;
-  };
-}> = ({ buildName, unityBuildRoot, sliderOption }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [progress] = useState(1);
-  const unityCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const gameInstanceRef = useRef<UnityLoader.Game | null>(null);
-
-  const [slider, setSlider] = useState(0);
-
-  useEffect(() => {
-    const { current: gameInstance } = gameInstanceRef;
-    if (!gameInstance || !sliderOption) {
-      return;
-    }
-    gameInstance.SendMessage(
-      sliderOption.gameObject,
-      sliderOption.methodName,
-      slider
-    );
-  }, [slider, sliderOption]);
-
-  const handleStart = () => {
-    const { current: unityContainer } = unityCanvasRef;
-    if (!unityContainer) {
-      return;
-    }
-    const unityInstance = createUnityInstance(unityContainer, {
-      dataUrl: `${unityBuildRoot}/${buildName}.data`,
-      frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js`,
-      codeUrl: `${unityBuildRoot}/${buildName}.wasm`,
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "DefaultCompany",
-      productName: buildName,
-      productVersion: "0.1"
+  width?: number;
+  height?: number;
+}> = ({ buildName, unityBuildRoot, width = 960, height = 600 }) => {
+  const [isActive, setIsActive] = useState(false);
+  const { unityContainerRef, scriptSrc, statusCode, loadingProgress } =
+    useUnity({
+      isActive,
+      buildName,
+      unityBuildRoot,
+      width,
+      height
     });
-    gameInstanceRef.current = unityInstance;
-    setIsLoading(true);
-  };
-
   return (
     <div css={mainStyle}>
-      <Script src={`${unityBuildRoot}/${buildName}.loader.js`} />
-      <div css={unityContainerStyle}>
-        <canvas
-          ref={unityCanvasRef}
-          id={`unity-canvas-${buildName}`}
-          width={960}
-          height={600}
-          style={{ width: "960px", height: "600px", background: "#231F20" }}
-        />
-      </div>
-      {!isLoading ? (
+      <Script src={scriptSrc} />
+      <div
+        ref={unityContainerRef}
+        css={css(unityContainerStyle, { width: px(width), height: px(height) })}
+      />
+      {statusCode === -1 ? (
         <div css={startViewStyle}>
-          <button type="button" onClick={handleStart}>
+          <button type="button" onClick={() => setIsActive(true)}>
             start
           </button>
         </div>
       ) : null}
-      {isLoading && progress < 1 ? (
+      {statusCode === 0 ? (
         <div css={progressViewStyle}>
           <div
-            style={{ width: percent(100 * progress) }}
+            style={{ width: percent(100 * loadingProgress) }}
             css={progressBarStyle}
           />
         </div>
       ) : null}
-      {isLoading && progress >= 1 && sliderOption ? (
-        <div>
-          <input
-            type="range"
-            min={sliderOption.min}
-            max={sliderOption.max}
-            value={slider}
-            onChange={e => setSlider(Number(e.target.value))}
-          />
-          &nbsp;
-          {slider}
+      {statusCode === 1 ? (
+        <div css={pauseViewStyle}>
+          <button type="button" onClick={() => setIsActive(false)}>
+            pause
+          </button>
         </div>
       ) : null}
     </div>
