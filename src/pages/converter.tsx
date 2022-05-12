@@ -84,10 +84,11 @@ const Slider: FC<{
 );
 
 const PageConverter: NextPage = () => {
-  const [rotateX, setRotateX] = useState(0);
-  const [rotateY, setRotateY] = useState(0);
-  const [rotateZ, setRotateZ] = useState(0);
+  const [inputX, setInputX] = useState(0);
+  const [inputY, setInputY] = useState(0);
+  const [inputZ, setInputZ] = useState(0);
   const [isCamera, setIsCamera] = useState(false);
+  const [isPos, setIsPos] = useState(false);
   const threeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const threeCubeRef = useRef<Mesh | null>(null);
   const threeCameraRef = useRef<PerspectiveCamera | null>(null);
@@ -148,18 +149,24 @@ const PageConverter: NextPage = () => {
     const { current: unityInstance } = unityInstanceRef;
     if (camera) {
       camera.rotation.set(
-        isCamera ? rotateX : 0,
-        isCamera ? rotateY : Math.PI,
-        isCamera ? rotateZ : 0
+        isCamera ? inputX : 0,
+        isCamera ? inputY : Math.PI,
+        isCamera ? inputZ : 0
       );
     }
     if (cube) {
+      cube.position.set(
+        !isCamera && isPos ? inputX : 0,
+        !isCamera && isPos ? inputY : 0,
+        !isCamera && isPos ? inputZ : 0
+      );
       cube.rotation.set(
-        isCamera ? 0 : rotateX,
-        isCamera ? 0 : rotateY,
-        isCamera ? 0 : rotateZ
+        isCamera || isPos ? 0 : inputX,
+        isCamera || isPos ? 0 : inputY,
+        isCamera || isPos ? 0 : inputZ
       );
     }
+
     if (camera && unityInstance) {
       const q = new Quaternion();
       q.setFromEuler(camera.rotation);
@@ -180,8 +187,11 @@ const PageConverter: NextPage = () => {
       unityInstance.SendMessage("Cube", "SetQuaternionZ", -q.z);
       unityInstance.SendMessage("Cube", "SetQuaternionW", q.w);
       unityInstance.SendMessage("Cube", "ApplyQuaternion");
+      unityInstance.SendMessage("Cube", "SetPositionX", -cube.position.x);
+      unityInstance.SendMessage("Cube", "SetPositionY", cube.position.y);
+      unityInstance.SendMessage("Cube", "SetPositionZ", cube.position.z);
     }
-  }, [rotateX, rotateY, rotateZ, isCamera]);
+  }, [inputX, inputY, inputZ, isCamera, isPos]);
 
   return (
     <div css={wrapperStyle}>
@@ -216,9 +226,28 @@ const PageConverter: NextPage = () => {
             camera
           </label>
         </p>
-        <Slider label="x" value={rotateX} onValue={setRotateX} />
-        <Slider label="y" value={rotateY} onValue={setRotateY} />
-        <Slider label="z" value={rotateZ} onValue={setRotateZ} />
+        <p>
+          <label>
+            <input
+              type="radio"
+              checked={!isPos}
+              onChange={e => setIsPos(!e.target.checked)}
+            />
+            rotate
+          </label>
+          &nbsp;
+          <label>
+            <input
+              type="radio"
+              checked={isPos}
+              onChange={e => setIsPos(e.target.checked)}
+            />
+            pos
+          </label>
+        </p>
+        <Slider label="x" value={inputX} onValue={setInputX} />
+        <Slider label="y" value={inputY} onValue={setInputY} />
+        <Slider label="z" value={inputZ} onValue={setInputZ} />
       </div>
     </div>
   );

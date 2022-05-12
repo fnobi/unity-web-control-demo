@@ -17,6 +17,36 @@ public class CameraController : MonoBehaviour
     {
     }
 
+    public void SetPositionX(float x)
+    {
+        transform.position = new Vector3(
+            x,
+            transform.position.y,
+            transform.position.z
+        );
+        Debug.Log("SetPositionX:" + x);
+    }
+
+    public void SetPositionY(float y)
+    {
+        transform.position = new Vector3(
+            transform.position.x,
+            y,
+            transform.position.z
+        );
+        Debug.Log("SetPositionY:" + y);
+    }
+
+    public void SetPositionZ(float z)
+    {
+        transform.position = new Vector3(
+            transform.position.x,
+            transform.position.y,
+            z
+        );
+        Debug.Log("SetPositionZ:" + z);
+    }
+
     public void SetQuaternionX(float x)
     {
         this.quaternionX = x;
