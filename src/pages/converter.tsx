@@ -178,6 +178,7 @@ const PageConverter: NextPage = () => {
       unityInstance.SendMessage("Main Camera", "SetQuaternionZ", -q.z);
       unityInstance.SendMessage("Main Camera", "SetQuaternionW", q.w);
       unityInstance.SendMessage("Main Camera", "ApplyQuaternion");
+      unityInstance.SendMessage("Main Camera", "SetFOV", camera.fov);
     }
     if (cube && unityInstance) {
       const q = new Quaternion();
