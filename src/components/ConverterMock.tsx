@@ -2,6 +2,7 @@ import {
   BoxGeometry,
   Mesh,
   MeshBasicMaterial,
+  Object3D,
   Quaternion,
   Vector3
 } from "three";
@@ -13,15 +14,19 @@ import Script from "next/script";
 import useThree from "~/lib/useThree";
 import { BASE_PATH } from "~/local/constants";
 
+const DEFAULT_CAMERA_POSITION = new Vector3(0, 1, -10);
+
 // NOTE: 以下は今回コードで同期していないので、Unity側と予め設定をそろえておく必要がある
 const CAMERA_FOV = 60;
 const CAMERA_CLIPPING_NEAR = 0.3;
 const CAMERA_CLIPPING_FAR = 1000;
-const CAMERA_POSITION = new Vector3(0, 1, -10);
 
 const BOX_SIZE_X = 2;
 const BOX_SIZE_Y = 1;
 const BOX_SIZE_Z = 3;
+
+const UNITY_OBJECT_CUBE = "Cube";
+const UNITY_OBJECT_CAMERA = "Main Camera";
 
 const wrapperStyle = css({
   position: "absolute",
@@ -122,6 +127,26 @@ const ConverterMock: FC = () => {
 
   const unityIsReady = unityStatusCode >= 1;
 
+  const syncObject = (srcObject: Object3D, name: string) => {
+    const { current: unityInstance } = unityInstanceRef;
+    if (!unityInstance) {
+      return;
+    }
+    const q = new Quaternion();
+    q.setFromEuler(srcObject.rotation);
+    const rotater = new Quaternion();
+    rotater.setFromAxisAngle(new Vector3(0, 1, 0).normalize(), Math.PI);
+    q.multiply(rotater);
+    unityInstance.SendMessage(name, "SetQuaternionX", q.x);
+    unityInstance.SendMessage(name, "SetQuaternionY", -q.y);
+    unityInstance.SendMessage(name, "SetQuaternionZ", -q.z);
+    unityInstance.SendMessage(name, "SetQuaternionW", q.w);
+    unityInstance.SendMessage(name, "ApplyQuaternion");
+    unityInstance.SendMessage(name, "SetPositionX", -srcObject.position.x);
+    unityInstance.SendMessage(name, "SetPositionY", srcObject.position.y);
+    unityInstance.SendMessage(name, "SetPositionZ", srcObject.position.z);
+  };
+
   useEffect(() => {
     const { current: scene } = sceneRef;
     const { current: camera } = cameraRef;
@@ -135,7 +160,7 @@ const ConverterMock: FC = () => {
     scene.add(cube);
     threeCubeRef.current = cube;
 
-    camera.position.copy(CAMERA_POSITION);
+    camera.position.copy(DEFAULT_CAMERA_POSITION);
 
     return () => {
       threeCubeRef.current = null;
@@ -145,7 +170,6 @@ const ConverterMock: FC = () => {
   useEffect(() => {
     const { current: cube } = threeCubeRef;
     const { current: camera } = cameraRef;
-    const { current: unityInstance } = unityInstanceRef;
 
     // state => three.jsへの同期
     if (camera) {
@@ -169,30 +193,13 @@ const ConverterMock: FC = () => {
     }
 
     // three.js => Unityへの同期
-    if (camera && unityIsReady && unityInstance) {
-      const q = new Quaternion();
-      q.setFromEuler(camera.rotation);
-      const rotater = new Quaternion();
-      rotater.setFromAxisAngle(new Vector3(0, 1, 0).normalize(), Math.PI);
-      q.multiply(rotater);
-      unityInstance.SendMessage("Main Camera", "SetQuaternionX", q.x);
-      unityInstance.SendMessage("Main Camera", "SetQuaternionY", -q.y);
-      unityInstance.SendMessage("Main Camera", "SetQuaternionZ", -q.z);
-      unityInstance.SendMessage("Main Camera", "SetQuaternionW", q.w);
-      unityInstance.SendMessage("Main Camera", "ApplyQuaternion");
-      unityInstance.SendMessage("Main Camera", "SetFOV", camera.fov);
-    }
-    if (cube && unityIsReady && unityInstance) {
-      const q = new Quaternion();
-      q.setFromEuler(cube.rotation);
-      unityInstance.SendMessage("Cube", "SetQuaternionX", q.x);
-      unityInstance.SendMessage("Cube", "SetQuaternionY", -q.y);
-      unityInstance.SendMessage("Cube", "SetQuaternionZ", -q.z);
-      unityInstance.SendMessage("Cube", "SetQuaternionW", q.w);
-      unityInstance.SendMessage("Cube", "ApplyQuaternion");
-      unityInstance.SendMessage("Cube", "SetPositionX", -cube.position.x);
-      unityInstance.SendMessage("Cube", "SetPositionY", cube.position.y);
-      unityInstance.SendMessage("Cube", "SetPositionZ", cube.position.z);
+    if (unityIsReady) {
+      if (camera) {
+        syncObject(camera, UNITY_OBJECT_CAMERA);
+      }
+      if (cube) {
+        syncObject(cube, UNITY_OBJECT_CUBE);
+      }
     }
   }, [inputX, inputY, inputZ, isCamera, isPos, unityIsReady]);
 
