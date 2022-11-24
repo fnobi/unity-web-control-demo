@@ -81,7 +81,7 @@ const gameContainerStyle = css({
 });
 
 const vectorWrapperStyle = css({
-  margin: em(1, 0)
+  margin: em(0.5, 0, 1, 0)
 });
 
 const ConverterMock: FC = () => {
@@ -217,7 +217,7 @@ const ConverterMock: FC = () => {
       </div>
       <div css={formWrapperStyle}>
         <div css={gameUnitStyle}>
-          <div>cube</div>
+          <div>cube position</div>
           <div css={vectorWrapperStyle}>
             <VectorForm
               range={10}
@@ -225,6 +225,9 @@ const ConverterMock: FC = () => {
               setInputVector={setCubePositionVector}
             />
           </div>
+        </div>
+        <div css={gameUnitStyle}>
+          <div>cube rotation</div>
           <div css={vectorWrapperStyle}>
             <VectorForm
               range={180}
@@ -234,7 +237,7 @@ const ConverterMock: FC = () => {
           </div>
         </div>
         <div css={gameUnitStyle}>
-          <div>camera</div>
+          <div>camera position</div>
           <div css={vectorWrapperStyle}>
             <VectorForm
               range={10}
@@ -242,6 +245,9 @@ const ConverterMock: FC = () => {
               setInputVector={setCameraPositionVector}
             />
           </div>
+        </div>
+        <div css={gameUnitStyle}>
+          <div>camera rotation</div>
           <div css={vectorWrapperStyle}>
             <VectorForm
               range={180}

@@ -13,7 +13,7 @@ const Slider: FC<{
     <input
       type="number"
       step={0.01}
-      style={{ width: em(5) }}
+      style={{ width: em(3) }}
       value={value}
       readOnly
     />
@@ -25,6 +25,7 @@ const Slider: FC<{
       max={range}
       step={0.01}
       onChange={e => onValue(Number(e.target.value))}
+      style={{ width: em(12) }}
     />
   </p>
 );
