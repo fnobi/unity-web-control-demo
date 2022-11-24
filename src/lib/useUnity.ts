@@ -4,13 +4,13 @@ const useUnity = (opts: {
   isActive: boolean;
   buildName: string;
   unityBuildRoot: string;
-  buildProfle: {
+  buildMeta: {
     companyName: string;
     productName: string;
     productVersion: string;
   };
 }) => {
-  const { isActive, buildName, unityBuildRoot, buildProfle } = opts;
+  const { isActive, buildName, unityBuildRoot, buildMeta: buildProfle } = opts;
   const [statusCode, setStatusCode] = useState<-1 | 0 | 1>(-1);
   const [retryCount, setRetryCount] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);

@@ -106,7 +106,7 @@ const PageConverter: NextPage = () => {
     isActive: true,
     buildName: "sample2021",
     unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`,
-    buildProfle: {
+    buildMeta: {
       companyName: "DefaultCompany",
       productName: "sample2021",
       productVersion: "0.1"
