@@ -7,12 +7,13 @@ import {
   Vector3
 } from "three";
 import { css } from "@emotion/react";
-import { em, percent, px, vw } from "~/lib/cssUtil";
+import { percent, px, vw } from "~/lib/cssUtil";
 import { FC, useEffect, useRef, useState } from "react";
 import useUnity from "~/lib/useUnity";
 import Script from "next/script";
 import useThree from "~/lib/useThree";
 import { BASE_PATH } from "~/local/constants";
+import VectorForm from "~/components/VectorForm";
 
 const DEFAULT_CAMERA_POSITION = new Vector3(0, 1, -10);
 
@@ -66,36 +67,8 @@ const gameContainerStyle = css({
   }
 });
 
-const Slider: FC<{
-  label: string;
-  value: number;
-  onValue: (n: number) => void;
-}> = ({ label, value, onValue }) => (
-  <p>
-    {label}:&nbsp;
-    <input
-      type="number"
-      step={0.01}
-      style={{ width: em(5) }}
-      value={value}
-      onChange={e => onValue(Number(e.target.value))}
-    />
-    &nbsp;
-    <input
-      type="range"
-      value={value}
-      min={-3.2}
-      max={3.2}
-      step={0.01}
-      onChange={e => onValue(Number(e.target.value))}
-    />
-  </p>
-);
-
 const ConverterMock: FC = () => {
-  const [inputX, setInputX] = useState(0);
-  const [inputY, setInputY] = useState(0);
-  const [inputZ, setInputZ] = useState(0);
+  const [inputVector, setInputVector] = useState(new Vector3(0, 0, 0));
   const [isCamera, setIsCamera] = useState(false);
   const [isPos, setIsPos] = useState(false);
   const threeCubeRef = useRef<Mesh | null>(null);
@@ -174,21 +147,21 @@ const ConverterMock: FC = () => {
     // state => three.jsへの同期
     if (camera) {
       camera.rotation.set(
-        isCamera ? inputX : 0,
-        isCamera ? inputY : Math.PI,
-        isCamera ? inputZ : 0
+        isCamera ? inputVector.x : 0,
+        isCamera ? inputVector.y : Math.PI,
+        isCamera ? inputVector.z : 0
       );
     }
     if (cube) {
       cube.position.set(
-        !isCamera && isPos ? inputX : 0,
-        !isCamera && isPos ? inputY : 0,
-        !isCamera && isPos ? inputZ : 0
+        !isCamera && isPos ? inputVector.x : 0,
+        !isCamera && isPos ? inputVector.y : 0,
+        !isCamera && isPos ? inputVector.z : 0
       );
       cube.rotation.set(
-        isCamera || isPos ? 0 : inputX,
-        isCamera || isPos ? 0 : inputY,
-        isCamera || isPos ? 0 : inputZ
+        isCamera || isPos ? 0 : inputVector.x,
+        isCamera || isPos ? 0 : inputVector.y,
+        isCamera || isPos ? 0 : inputVector.z
       );
     }
 
@@ -201,7 +174,7 @@ const ConverterMock: FC = () => {
         syncObject(cube, UNITY_OBJECT_CUBE);
       }
     }
-  }, [inputX, inputY, inputZ, isCamera, isPos, unityIsReady]);
+  }, [inputVector, isCamera, isPos, unityIsReady]);
 
   return (
     <div css={wrapperStyle}>
@@ -255,9 +228,7 @@ const ConverterMock: FC = () => {
             pos
           </label>
         </p>
-        <Slider label="x" value={inputX} onValue={setInputX} />
-        <Slider label="y" value={inputY} onValue={setInputY} />
-        <Slider label="z" value={inputZ} onValue={setInputZ} />
+        <VectorForm inputVector={inputVector} setInputVector={setInputVector} />
       </div>
     </div>
   );
