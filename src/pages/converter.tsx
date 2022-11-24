@@ -100,7 +100,8 @@ const PageConverter: NextPage = () => {
   const {
     instanceRef: unityInstanceRef,
     containerRef: unityContainerRef,
-    scriptSrc
+    statusCode: unityStatusCode,
+    scriptSrc: unityScriptSrc
   } = useUnity({
     isActive: true,
     buildName: "sample2021",
@@ -120,6 +121,8 @@ const PageConverter: NextPage = () => {
     clearColor: [0x000000, 1],
     cameraOption: [CAMERA_FOV, 1, CAMERA_CLIPPING_NEAR, CAMERA_CLIPPING_FAR]
   });
+
+  const unityIsReady = unityStatusCode >= 1;
 
   useEffect(() => {
     const { current: scene } = sceneRef;
@@ -168,7 +171,7 @@ const PageConverter: NextPage = () => {
     }
 
     // three.js => Unityへの同期
-    if (camera && unityInstance) {
+    if (camera && unityIsReady && unityInstance) {
       const q = new Quaternion();
       q.setFromEuler(camera.rotation);
       const rotater = new Quaternion();
@@ -181,7 +184,7 @@ const PageConverter: NextPage = () => {
       unityInstance.SendMessage("Main Camera", "ApplyQuaternion");
       unityInstance.SendMessage("Main Camera", "SetFOV", camera.fov);
     }
-    if (cube && unityInstance) {
+    if (cube && unityIsReady && unityInstance) {
       const q = new Quaternion();
       q.setFromEuler(cube.rotation);
       unityInstance.SendMessage("Cube", "SetQuaternionX", q.x);
@@ -193,11 +196,11 @@ const PageConverter: NextPage = () => {
       unityInstance.SendMessage("Cube", "SetPositionY", cube.position.y);
       unityInstance.SendMessage("Cube", "SetPositionZ", cube.position.z);
     }
-  }, [inputX, inputY, inputZ, isCamera, isPos]);
+  }, [inputX, inputY, inputZ, isCamera, isPos, unityIsReady]);
 
   return (
     <div css={wrapperStyle}>
-      <Script src={scriptSrc} />
+      <Script src={unityScriptSrc} />
       <div css={gameWrapperStyle}>
         <div>
           <p>unity</p>
