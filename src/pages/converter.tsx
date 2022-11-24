@@ -11,15 +11,14 @@ import {
   WebGLRenderer
 } from "three";
 import { css } from "@emotion/react";
-import { em, percent } from "~/lib/cssUtil";
+import { em, percent, px } from "~/lib/cssUtil";
 import { FC, useEffect, useRef, useState } from "react";
 import useUnity from "~/lib/useUnity";
 import Script from "next/script";
 import { BASE_PATH } from "~/local/constants";
 
-// このへんはunity側と前提を揃える必要があるところ
-const WIDTH = 960;
-const HEIGHT = 600;
+const WIDTH = 500;
+const HEIGHT = 500;
 
 const CAMERA_FOV = 60;
 const CAMERA_CLIPPING_NEAR = 0.3;
@@ -43,17 +42,27 @@ const wrapperStyle = css({
   height: percent(100)
 });
 
-const columnStyle = css({
+const gameWrapperStyle = css({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center"
 });
 
-const threeCanvasStyle = css({
-  marginLeft: em(1),
+const gameUnitStyle = css({
+  margin: em(0, 1)
+});
+
+const gameContainerStyle = css({
+  position: "relative",
+  width: px(WIDTH),
+  height: px(HEIGHT),
   canvas: {
-    backgroundColor: "#ccc"
+    position: "absolute",
+    left: percent(0),
+    top: percent(0),
+    width: percent(100),
+    height: percent(100)
   }
 });
 
@@ -96,9 +105,7 @@ const PageConverter: NextPage = () => {
   const { unityInstanceRef, unityContainerRef, scriptSrc } = useUnity({
     isActive: true,
     buildName: "sample2021",
-    unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`,
-    width: WIDTH,
-    height: HEIGHT
+    unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`
   });
 
   useEffect(() => {
@@ -110,7 +117,7 @@ const PageConverter: NextPage = () => {
     const scene = new Scene();
     const camera = new PerspectiveCamera(
       CAMERA_FOV,
-      WIDTH / HEIGHT,
+      canvas.offsetWidth / canvas.offsetHeight,
       CAMERA_CLIPPING_NEAR,
       CAMERA_CLIPPING_FAR
     );
@@ -197,14 +204,16 @@ const PageConverter: NextPage = () => {
   return (
     <div css={wrapperStyle}>
       <Script src={scriptSrc} />
-      <div css={columnStyle}>
+      <div css={gameWrapperStyle}>
         <div>
           <p>unity</p>
-          <div ref={unityContainerRef} />
+          <div ref={unityContainerRef} css={gameContainerStyle} />
         </div>
-        <div css={threeCanvasStyle}>
+        <div css={gameUnitStyle}>
           <p>three.js</p>
-          <canvas width={WIDTH} height={HEIGHT} ref={threeCanvasRef} />
+          <div css={gameContainerStyle}>
+            <canvas width={WIDTH} height={HEIGHT} ref={threeCanvasRef} />
+          </div>
         </div>
       </div>
       <div>

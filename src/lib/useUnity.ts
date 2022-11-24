@@ -4,10 +4,8 @@ const useUnity = (opts: {
   isActive: boolean;
   buildName: string;
   unityBuildRoot: string;
-  width: number;
-  height: number;
 }) => {
-  const { isActive, buildName, unityBuildRoot, width, height } = opts;
+  const { isActive, buildName, unityBuildRoot } = opts;
   const [statusCode, setStatusCode] = useState<-1 | 0 | 1>(-1);
   const [retryCount, setRetryCount] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -30,8 +28,6 @@ const useUnity = (opts: {
     cleanContainer();
     const canvas = document.createElement("canvas");
     canvas.setAttribute("id", `unity-canvas-${buildName}`);
-    canvas.setAttribute("width", String(width));
-    canvas.setAttribute("height", String(height));
     unityContainer.appendChild(canvas);
 
     setStatusCode(0);
@@ -45,7 +41,7 @@ const useUnity = (opts: {
         companyName: "DefaultCompany",
         productName: buildName,
         productVersion: "0.1",
-        matchWebGLToCanvasSize: false
+        matchWebGLToCanvasSize: true
       },
       setLoadingProgress
     )
