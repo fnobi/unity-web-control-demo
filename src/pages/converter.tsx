@@ -1,30 +1,27 @@
 import { NextPage } from "next";
 import {
   BoxGeometry,
-  Euler,
   Mesh,
   MeshBasicMaterial,
-  PerspectiveCamera,
   Quaternion,
-  Scene,
-  Vector3,
-  WebGLRenderer
+  Vector3
 } from "three";
 import { css } from "@emotion/react";
 import { em, percent, px } from "~/lib/cssUtil";
 import { FC, useEffect, useRef, useState } from "react";
 import useUnity from "~/lib/useUnity";
 import Script from "next/script";
+import useThree from "~/lib/useThree";
 import { BASE_PATH } from "~/local/constants";
 
 const WIDTH = 500;
 const HEIGHT = 500;
 
+// NOTE: 以下は今回コードで同期していないので、Unity側と予め設定をそろえておく必要がある
 const CAMERA_FOV = 60;
 const CAMERA_CLIPPING_NEAR = 0.3;
 const CAMERA_CLIPPING_FAR = 1000;
 const CAMERA_POSITION = new Vector3(0, 1, -10);
-const CAMERA_ROTATION = new Euler(0, Math.PI, 0);
 
 const BOX_SIZE_X = 2;
 const BOX_SIZE_Y = 1;
@@ -98,11 +95,13 @@ const PageConverter: NextPage = () => {
   const [inputZ, setInputZ] = useState(0);
   const [isCamera, setIsCamera] = useState(false);
   const [isPos, setIsPos] = useState(false);
-  const threeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const threeCubeRef = useRef<Mesh | null>(null);
-  const threeCameraRef = useRef<PerspectiveCamera | null>(null);
 
-  const { unityInstanceRef, unityContainerRef, scriptSrc } = useUnity({
+  const {
+    instanceRef: unityInstanceRef,
+    containerRef: unityContainerRef,
+    scriptSrc
+  } = useUnity({
     isActive: true,
     buildName: "sample2021",
     unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`,
@@ -113,21 +112,21 @@ const PageConverter: NextPage = () => {
     }
   });
 
+  const {
+    containerRef: threeContainerRef,
+    sceneRef,
+    cameraRef
+  } = useThree({
+    clearColor: [0x000000, 1],
+    cameraOption: [CAMERA_FOV, 1, CAMERA_CLIPPING_NEAR, CAMERA_CLIPPING_FAR]
+  });
+
   useEffect(() => {
-    const { current: canvas } = threeCanvasRef;
-    if (!canvas) {
+    const { current: scene } = sceneRef;
+    const { current: camera } = cameraRef;
+    if (!scene || !camera) {
       return () => {};
     }
-
-    const scene = new Scene();
-    const camera = new PerspectiveCamera(
-      CAMERA_FOV,
-      canvas.offsetWidth / canvas.offsetHeight,
-      CAMERA_CLIPPING_NEAR,
-      CAMERA_CLIPPING_FAR
-    );
-
-    const renderer = new WebGLRenderer({ canvas });
 
     const geometry = new BoxGeometry(BOX_SIZE_X, BOX_SIZE_Y, BOX_SIZE_Z);
     const material = new MeshBasicMaterial({ color: 0x00ff00 });
@@ -136,29 +135,18 @@ const PageConverter: NextPage = () => {
     threeCubeRef.current = cube;
 
     camera.position.copy(CAMERA_POSITION);
-    camera.rotation.copy(CAMERA_ROTATION);
-    threeCameraRef.current = camera;
-
-    let t = -1;
-
-    function animate() {
-      t = window.requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-    }
-
-    animate();
 
     return () => {
       threeCubeRef.current = null;
-      threeCameraRef.current = null;
-      window.cancelAnimationFrame(t);
     };
   }, []);
 
   useEffect(() => {
     const { current: cube } = threeCubeRef;
-    const { current: camera } = threeCameraRef;
+    const { current: camera } = cameraRef;
     const { current: unityInstance } = unityInstanceRef;
+
+    // state => three.jsへの同期
     if (camera) {
       camera.rotation.set(
         isCamera ? inputX : 0,
@@ -179,6 +167,7 @@ const PageConverter: NextPage = () => {
       );
     }
 
+    // three.js => Unityへの同期
     if (camera && unityInstance) {
       const q = new Quaternion();
       q.setFromEuler(camera.rotation);
@@ -216,9 +205,7 @@ const PageConverter: NextPage = () => {
         </div>
         <div css={gameUnitStyle}>
           <p>three.js</p>
-          <div css={gameContainerStyle}>
-            <canvas width={WIDTH} height={HEIGHT} ref={threeCanvasRef} />
-          </div>
+          <div css={gameContainerStyle} ref={threeContainerRef} />
         </div>
       </div>
       <div>

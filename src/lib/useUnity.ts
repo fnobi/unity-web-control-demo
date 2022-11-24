@@ -15,26 +15,20 @@ const useUnity = (opts: {
   const [statusCode, setStatusCode] = useState<-1 | 0 | 1>(-1);
   const [retryCount, setRetryCount] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const unityContainerRef = useRef<HTMLDivElement | null>(null);
-  const unityInstanceRef = useRef<UnityInstance | null>(null);
-
-  const cleanContainer = () => {
-    const { current: unityContainer } = unityContainerRef;
-    if (!unityContainer) {
-      return;
-    }
-    unityContainer.innerHTML = "";
-  };
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const instanceRef = useRef<UnityInstance | null>(null);
 
   const handleStart = () => {
-    const { current: unityContainer } = unityContainerRef;
-    if (!unityContainer) {
+    const { current: container } = containerRef;
+    if (!container) {
       return;
     }
-    cleanContainer();
+
+    container.innerHTML = "";
+
     const canvas = document.createElement("canvas");
     canvas.setAttribute("id", `unity-canvas-${buildName}`);
-    unityContainer.appendChild(canvas);
+    container.appendChild(canvas);
 
     setStatusCode(0);
     createUnityInstance(
@@ -49,8 +43,8 @@ const useUnity = (opts: {
       },
       setLoadingProgress
     )
-      .then(unityInstance => {
-        unityInstanceRef.current = unityInstance;
+      .then(instance => {
+        instanceRef.current = instance;
         setStatusCode(1);
       })
       .catch(msg => {
@@ -74,11 +68,11 @@ const useUnity = (opts: {
 
     handleStart();
     return () => {
-      const { current: unityInstance } = unityInstanceRef;
       setLoadingProgress(0);
       setStatusCode(-1);
-      if (unityInstance) {
-        unityInstance.Quit().then(() => cleanContainer());
+      const { current: instance } = instanceRef;
+      if (instance) {
+        instance.Quit();
       }
     };
   }, [isActive, retryCount]);
@@ -86,8 +80,8 @@ const useUnity = (opts: {
   const scriptSrc = `${unityBuildRoot}/${buildName}.loader.js`;
 
   return {
-    unityContainerRef,
-    unityInstanceRef,
+    containerRef,
+    instanceRef,
     statusCode,
     loadingProgress,
     scriptSrc

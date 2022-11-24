@@ -60,14 +60,18 @@ const UnityEmbed2021: FC<{
   height?: number;
 }> = ({ buildName, unityBuildRoot, width = 960, height = 600 }) => {
   const [isActive, setIsActive] = useState(false);
-  const { unityContainerRef, scriptSrc, statusCode, loadingProgress } =
-    useUnity({
-      isActive,
-      buildName,
-      unityBuildRoot,
-      width,
-      height
-    });
+  const {
+    containerRef: unityContainerRef,
+    scriptSrc,
+    statusCode,
+    loadingProgress
+  } = useUnity({
+    isActive,
+    buildName,
+    unityBuildRoot,
+    width,
+    height
+  });
   return (
     <div css={mainStyle}>
       <Script src={scriptSrc} />
