@@ -1,4 +1,3 @@
-import { NextPage } from "next";
 import {
   BoxGeometry,
   Mesh,
@@ -88,7 +87,7 @@ const Slider: FC<{
   </p>
 );
 
-const PageConverter: NextPage = () => {
+const ConverterMock: FC = () => {
   const [inputX, setInputX] = useState(0);
   const [inputY, setInputY] = useState(0);
   const [inputZ, setInputZ] = useState(0);
@@ -257,4 +256,4 @@ const PageConverter: NextPage = () => {
   );
 };
 
-export default PageConverter;
+export default ConverterMock;
