@@ -89,13 +89,13 @@ const ConverterMock: FC = () => {
     new Vector3(0, 0, 0)
   );
   const [cubeRotationVector, setCubeRotationVector] = useState(
-    new Vector3(0, 0, 0)
+    new Vector3(-130, 60, -10)
   );
   const [cameraPositionVector, setCameraPositionVector] = useState(
-    new Vector3(0, 1, 10)
+    new Vector3(5, 1, 5)
   );
   const [cameraRotationVector, setCameraRotationVector] = useState(
-    new Vector3(0, 0, 0)
+    new Vector3(0, 45, 0)
   );
   const threeCubeRef = useRef<Mesh | null>(null);
 
