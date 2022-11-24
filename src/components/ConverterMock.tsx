@@ -171,17 +171,17 @@ const ConverterMock: FC = () => {
     if (camera) {
       camera.position.copy(cameraPositionVector);
       camera.rotation.set(
-        cameraRotationVector.x,
-        cameraRotationVector.y,
-        cameraRotationVector.z
+        (cameraRotationVector.x / 180) * Math.PI,
+        (cameraRotationVector.y / 180) * Math.PI,
+        (cameraRotationVector.z / 180) * Math.PI
       );
     }
     if (cube) {
       cube.position.copy(cubePositionVector);
       cube.rotation.set(
-        cubeRotationVector.x,
-        cubeRotationVector.y,
-        cubeRotationVector.z
+        (cubeRotationVector.x / 180) * Math.PI,
+        (cubeRotationVector.y / 180) * Math.PI,
+        (cubeRotationVector.z / 180) * Math.PI
       );
     }
 
@@ -227,7 +227,7 @@ const ConverterMock: FC = () => {
           </div>
           <div css={vectorWrapperStyle}>
             <VectorForm
-              range={3.2}
+              range={180}
               inputVector={cubeRotationVector}
               setInputVector={setCubeRotationVector}
             />
@@ -244,7 +244,7 @@ const ConverterMock: FC = () => {
           </div>
           <div css={vectorWrapperStyle}>
             <VectorForm
-              range={3.2}
+              range={180}
               inputVector={cameraRotationVector}
               setInputVector={setCameraRotationVector}
             />
