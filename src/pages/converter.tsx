@@ -7,15 +7,12 @@ import {
   Vector3
 } from "three";
 import { css } from "@emotion/react";
-import { em, percent, px } from "~/lib/cssUtil";
+import { em, percent, px, vw } from "~/lib/cssUtil";
 import { FC, useEffect, useRef, useState } from "react";
 import useUnity from "~/lib/useUnity";
 import Script from "next/script";
 import useThree from "~/lib/useThree";
 import { BASE_PATH } from "~/local/constants";
-
-const WIDTH = 500;
-const HEIGHT = 500;
 
 // NOTE: 以下は今回コードで同期していないので、Unity側と予め設定をそろえておく必要がある
 const CAMERA_FOV = 60;
@@ -28,7 +25,7 @@ const BOX_SIZE_Y = 1;
 const BOX_SIZE_Z = 3;
 
 const wrapperStyle = css({
-  position: "fixed",
+  position: "absolute",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -36,10 +33,11 @@ const wrapperStyle = css({
   top: percent(0),
   left: percent(0),
   width: percent(100),
-  height: percent(100)
+  minHeight: percent(100)
 });
 
 const gameWrapperStyle = css({
+  width: percent(100),
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -47,13 +45,14 @@ const gameWrapperStyle = css({
 });
 
 const gameUnitStyle = css({
-  margin: em(0, 1)
+  width: percent(100)
 });
 
 const gameContainerStyle = css({
   position: "relative",
-  width: px(WIDTH),
-  height: px(HEIGHT),
+  width: percent(100),
+  height: vw(100),
+  maxHeight: px(500),
   canvas: {
     position: "absolute",
     left: percent(0),
@@ -202,7 +201,7 @@ const PageConverter: NextPage = () => {
     <div css={wrapperStyle}>
       <Script src={unityScriptSrc} />
       <div css={gameWrapperStyle}>
-        <div>
+        <div css={gameUnitStyle}>
           <p>unity</p>
           <div ref={unityContainerRef} css={gameContainerStyle} />
         </div>
