@@ -7,15 +7,14 @@ import {
   Vector3
 } from "three";
 import { css } from "@emotion/react";
-import { percent, px, vw } from "~/lib/cssUtil";
+import { em, percent, px, vw } from "~/lib/cssUtil";
 import { FC, useEffect, useRef, useState } from "react";
 import useUnity from "~/lib/useUnity";
 import Script from "next/script";
 import useThree from "~/lib/useThree";
 import { BASE_PATH } from "~/local/constants";
+import { spStyle } from "~/local/emotionMixin";
 import VectorForm from "~/components/VectorForm";
-
-const DEFAULT_CAMERA_POSITION = new Vector3(0, 1, -10);
 
 // NOTE: 以下は今回コードで同期していないので、Unity側と予め設定をそろえておく必要がある
 const CAMERA_FOV = 60;
@@ -49,6 +48,20 @@ const gameWrapperStyle = css({
   textAlign: "center"
 });
 
+const formWrapperStyle = css(
+  {
+    width: percent(100),
+    marginTop: em(1),
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center"
+  },
+  spStyle({
+    flexDirection: "column"
+  })
+);
+
 const gameUnitStyle = css({
   width: percent(100)
 });
@@ -67,10 +80,23 @@ const gameContainerStyle = css({
   }
 });
 
+const vectorWrapperStyle = css({
+  margin: em(1, 0)
+});
+
 const ConverterMock: FC = () => {
-  const [inputVector, setInputVector] = useState(new Vector3(0, 0, 0));
-  const [isCamera, setIsCamera] = useState(false);
-  const [isPos, setIsPos] = useState(false);
+  const [cubePositionVector, setCubePositionVector] = useState(
+    new Vector3(0, 0, 0)
+  );
+  const [cubeRotationVector, setCubeRotationVector] = useState(
+    new Vector3(0, 0, 0)
+  );
+  const [cameraPositionVector, setCameraPositionVector] = useState(
+    new Vector3(0, 1, 10)
+  );
+  const [cameraRotationVector, setCameraRotationVector] = useState(
+    new Vector3(0, 0, 0)
+  );
   const threeCubeRef = useRef<Mesh | null>(null);
 
   const {
@@ -122,8 +148,7 @@ const ConverterMock: FC = () => {
 
   useEffect(() => {
     const { current: scene } = sceneRef;
-    const { current: camera } = cameraRef;
-    if (!scene || !camera) {
+    if (!scene) {
       return () => {};
     }
 
@@ -132,8 +157,6 @@ const ConverterMock: FC = () => {
     const cube = new Mesh(geometry, material);
     scene.add(cube);
     threeCubeRef.current = cube;
-
-    camera.position.copy(DEFAULT_CAMERA_POSITION);
 
     return () => {
       threeCubeRef.current = null;
@@ -146,22 +169,19 @@ const ConverterMock: FC = () => {
 
     // state => three.jsへの同期
     if (camera) {
+      camera.position.copy(cameraPositionVector);
       camera.rotation.set(
-        isCamera ? inputVector.x : 0,
-        isCamera ? inputVector.y : Math.PI,
-        isCamera ? inputVector.z : 0
+        cameraRotationVector.x,
+        cameraRotationVector.y,
+        cameraRotationVector.z
       );
     }
     if (cube) {
-      cube.position.set(
-        !isCamera && isPos ? inputVector.x : 0,
-        !isCamera && isPos ? inputVector.y : 0,
-        !isCamera && isPos ? inputVector.z : 0
-      );
+      cube.position.copy(cubePositionVector);
       cube.rotation.set(
-        isCamera || isPos ? 0 : inputVector.x,
-        isCamera || isPos ? 0 : inputVector.y,
-        isCamera || isPos ? 0 : inputVector.z
+        cubeRotationVector.x,
+        cubeRotationVector.y,
+        cubeRotationVector.z
       );
     }
 
@@ -174,7 +194,13 @@ const ConverterMock: FC = () => {
         syncObject(cube, UNITY_OBJECT_CUBE);
       }
     }
-  }, [inputVector, isCamera, isPos, unityIsReady]);
+  }, [
+    cubePositionVector,
+    cubeRotationVector,
+    cameraPositionVector,
+    cameraRotationVector,
+    unityIsReady
+  ]);
 
   return (
     <div css={wrapperStyle}>
@@ -189,46 +215,41 @@ const ConverterMock: FC = () => {
           <div css={gameContainerStyle} ref={threeContainerRef} />
         </div>
       </div>
-      <div>
-        <p>
-          <label>
-            <input
-              type="radio"
-              checked={!isCamera}
-              onChange={e => setIsCamera(!e.target.checked)}
+      <div css={formWrapperStyle}>
+        <div css={gameUnitStyle}>
+          <div>cube</div>
+          <div css={vectorWrapperStyle}>
+            <VectorForm
+              range={10}
+              inputVector={cubePositionVector}
+              setInputVector={setCubePositionVector}
             />
-            box
-          </label>
-          &nbsp;
-          <label>
-            <input
-              type="radio"
-              checked={isCamera}
-              onChange={e => setIsCamera(e.target.checked)}
+          </div>
+          <div css={vectorWrapperStyle}>
+            <VectorForm
+              range={3.2}
+              inputVector={cubeRotationVector}
+              setInputVector={setCubeRotationVector}
             />
-            camera
-          </label>
-        </p>
-        <p>
-          <label>
-            <input
-              type="radio"
-              checked={!isPos}
-              onChange={e => setIsPos(!e.target.checked)}
+          </div>
+        </div>
+        <div css={gameUnitStyle}>
+          <div>camera</div>
+          <div css={vectorWrapperStyle}>
+            <VectorForm
+              range={10}
+              inputVector={cameraPositionVector}
+              setInputVector={setCameraPositionVector}
             />
-            rotate
-          </label>
-          &nbsp;
-          <label>
-            <input
-              type="radio"
-              checked={isPos}
-              onChange={e => setIsPos(e.target.checked)}
+          </div>
+          <div css={vectorWrapperStyle}>
+            <VectorForm
+              range={3.2}
+              inputVector={cameraRotationVector}
+              setInputVector={setCameraRotationVector}
             />
-            pos
-          </label>
-        </p>
-        <VectorForm inputVector={inputVector} setInputVector={setInputVector} />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -5,8 +5,9 @@ import { Dispatch, FC, SetStateAction } from "react";
 const Slider: FC<{
   label: string;
   value: number;
+  range: number;
   onValue: (n: number) => void;
-}> = ({ label, value, onValue }) => (
+}> = ({ label, value, range, onValue }) => (
   <p>
     {label}:&nbsp;
     <input
@@ -20,8 +21,8 @@ const Slider: FC<{
     <input
       type="range"
       value={value}
-      min={-3.2}
-      max={3.2}
+      min={-range}
+      max={range}
       step={0.01}
       onChange={e => onValue(Number(e.target.value))}
     />
@@ -31,20 +32,24 @@ const Slider: FC<{
 const VectorForm: FC<{
   inputVector: Vector3;
   setInputVector: Dispatch<SetStateAction<Vector3>>;
-}> = ({ inputVector, setInputVector }) => (
+  range: number;
+}> = ({ inputVector, setInputVector, range }) => (
   <div>
     <Slider
       label="x"
+      range={range}
       value={inputVector.x}
       onValue={n => setInputVector(v => v.clone().setX(n))}
     />
     <Slider
       label="y"
+      range={range}
       value={inputVector.y}
       onValue={n => setInputVector(v => v.clone().setY(n))}
     />
     <Slider
       label="z"
+      range={range}
       value={inputVector.z}
       onValue={n => setInputVector(v => v.clone().setZ(n))}
     />
