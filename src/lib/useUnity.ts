@@ -4,13 +4,14 @@ const useUnity = (opts: {
   isActive: boolean;
   buildName: string;
   unityBuildRoot: string;
+  postfix?: string; // NOTE: ビルド方式によって、 `.unityweb` を入れる必要があるケースがある
   buildMeta: {
     companyName: string;
     productName: string;
     productVersion: string;
   };
 }) => {
-  const { isActive, buildName, unityBuildRoot, buildMeta: buildProfle } = opts;
+  const { isActive, buildName, unityBuildRoot, postfix = "", buildMeta } = opts;
   const [statusCode, setStatusCode] = useState<-1 | 0 | 1>(-1);
   const [retryCount, setRetryCount] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -39,10 +40,10 @@ const useUnity = (opts: {
     createUnityInstance(
       canvas,
       {
-        ...buildProfle,
-        dataUrl: `${unityBuildRoot}/${buildName}.data`,
-        frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js`,
-        codeUrl: `${unityBuildRoot}/${buildName}.wasm`,
+        ...buildMeta,
+        dataUrl: `${unityBuildRoot}/${buildName}.data${postfix}`,
+        frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js${postfix}`,
+        codeUrl: `${unityBuildRoot}/${buildName}.wasm${postfix}`,
         streamingAssetsUrl: "StreamingAssets",
         matchWebGLToCanvasSize: true
       },
@@ -53,7 +54,8 @@ const useUnity = (opts: {
         setStatusCode(1);
       })
       .catch(msg => {
-        console.log(msg);
+        // eslint-disable-next-line no-console
+        console.error(msg);
       });
   };
 
