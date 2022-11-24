@@ -4,8 +4,13 @@ const useUnity = (opts: {
   isActive: boolean;
   buildName: string;
   unityBuildRoot: string;
+  buildProfle: {
+    companyName: string;
+    productName: string;
+    productVersion: string;
+  };
 }) => {
-  const { isActive, buildName, unityBuildRoot } = opts;
+  const { isActive, buildName, unityBuildRoot, buildProfle } = opts;
   const [statusCode, setStatusCode] = useState<-1 | 0 | 1>(-1);
   const [retryCount, setRetryCount] = useState(0);
   const [loadingProgress, setLoadingProgress] = useState(0);
@@ -34,13 +39,11 @@ const useUnity = (opts: {
     createUnityInstance(
       canvas,
       {
+        ...buildProfle,
         dataUrl: `${unityBuildRoot}/${buildName}.data`,
         frameworkUrl: `${unityBuildRoot}/${buildName}.framework.js`,
         codeUrl: `${unityBuildRoot}/${buildName}.wasm`,
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: buildName,
-        productVersion: "0.1",
         matchWebGLToCanvasSize: true
       },
       setLoadingProgress

@@ -105,7 +105,12 @@ const PageConverter: NextPage = () => {
   const { unityInstanceRef, unityContainerRef, scriptSrc } = useUnity({
     isActive: true,
     buildName: "sample2021",
-    unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`
+    unityBuildRoot: `${BASE_PATH}/unity-webgl/sample2021/Build`,
+    buildProfle: {
+      companyName: "DefaultCompany",
+      productName: "sample2021",
+      productVersion: "0.1"
+    }
   });
 
   useEffect(() => {
